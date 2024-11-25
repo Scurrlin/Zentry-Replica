@@ -151,7 +151,7 @@ const Hero = () => {
             </h1>
 
             <p className="mb-5 max-w-64 font-robert-regular text-blue-100">
-              Enter the Metagame Layer <br /> Unleash the Play Economy
+              Enter the Metagame<br />Unleash the Play Economy
             </p>
 
             <Button
