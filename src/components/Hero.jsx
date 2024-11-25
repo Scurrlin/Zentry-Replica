@@ -10,11 +10,11 @@ import VideoPreview from "./VideoPreview";
 gsap.registerPlugin(ScrollTrigger);
 
 const Hero = () => {
-  const[currentIndex, setCurrentIndes] = useState(1);
-  const[hasClicked, setHasClicked] = useState(false);
+  const [currentIndex, setCurrentIndex] = useState(1);
+  const [hasClicked, setHasClicked] = useState(false);
 
   const [loading, setLoading] = useState(true);
-  const[loadedVideos, setLoadedVideos] = useState(0);
+  const [loadedVideos, setLoadedVideos] = useState(0);
 
   const totalVideos = 4;
   const nextVdRef = useRef(null);
@@ -32,12 +32,12 @@ const Hero = () => {
   const handleMiniVdClick = () => {
     setHasClicked(true);
 
-    setCurrentIndesIndex((prevIndex) => (prevIndex % totalVideos) + 1);
+    setCurrentIndex((prevIndex) => (prevIndex % totalVideos) + 1);
   };
 
   useGSAP(
     () => {
-      if (hasclicked) {
+      if (hasClicked) {
         gsap.set("#next-video", { visibility: "visible" });
         gsap.to("#next-video", {
           transformOrigin: "center center",
@@ -57,7 +57,7 @@ const Hero = () => {
       }
     },
     {
-      dependecies: [currentIndex],
+      dependencies: [currentIndex],
       revertOnUpdate: true,
     }
   );
@@ -82,11 +82,11 @@ const Hero = () => {
 
   const getVideoSrc = (index) => `videos/hero-${index}.mp4`;
 
-  retuun (
+  return (
     <div className="relative h-dvh w-screen overflow-x-hidden">
       {loading && (
         <div className="flex-center absolute z-[100] h-dvh w-screen overflow-hidden bg-violet-50">
-          {/* https://uiverse.io/G4b4131/tidy-walrus-92 */}
+          {/* https://uiverse.io/G4b413l/tidy-walrus-92 */}
           <div className="three-body">
             <div className="three-body__dot"></div>
             <div className="three-body__dot"></div>
@@ -100,7 +100,7 @@ const Hero = () => {
         className="relative z-10 h-dvh w-screen overflow-hidden rounded-lg bg-blue-75"
       >
         <div>
-          <div className="mask-clip-path absolute-center absolute z-50 size-64 cursor-pointer overflow-hideen rounded-lg">
+          <div className="mask-clip-path absolute-center absolute z-50 size-64 cursor-pointer overflow-hidden rounded-lg">
             <VideoPreview>
               <div
                 onClick={handleMiniVdClick}
@@ -143,7 +143,7 @@ const Hero = () => {
         <h1 className="special-font hero-heading absolute bottom-5 right-5 z-40 text-blue-75">
           G<b>A</b>MING
         </h1>
-        
+
         <div className="absolute left-0 top-0 z-40 size-full">
           <div className="mt-24 px-5 sm:px-10">
             <h1 className="special-font hero-heading text-blue-100">
