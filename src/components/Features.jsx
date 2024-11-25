@@ -106,9 +106,7 @@ const Features = () => (
           Dive into the 'Game of Games' Universe
         </p>
         <p className="max-w-md font-circular-web text-lg text-blue-50 opacity-50">
-          Immerse yourself in a rich and ever-expanding universe where a vibrant
-          array of products converge into an interconnected overlay experience
-          on your world.
+          Immerse yourself in a rich and ever-expanding ecosystem where a vibrant array of products converge into an interconnected universe.
         </p>
       </div>
 
