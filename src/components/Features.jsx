@@ -147,7 +147,7 @@ const Features = () => (
                 n<b>e</b>xus
               </>
             }
-            description="A gamified social hub, adding a new dimension of play to social interaction for Web3 communities."
+            description="A gamified social hub, adding a new dimension of play to your identity, Web3 engagement, and social interaction."
             isComingSoon
           />
         </BentoTilt>
