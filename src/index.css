@@ -36,11 +36,6 @@ body {
     font-family: "zentry";
     src: url("/fonts/zentry-regular.woff2") format("woff2");
   }
-
-  .special-font b {
-    font-family: "Zentry";
-    font-feature-settings: "ss01" on;
-  }
 }
 
 @layer utilities {
@@ -66,6 +61,11 @@ body {
 
   .mask-clip-path {
     clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%);
+  }
+
+  .special-font b {
+    font-family: "Zentry";
+    font-feature-settings: "ss01" on;
   }
 
   .hero-heading {
@@ -104,30 +104,30 @@ body {
   }
 
   .story-img-container {
-    @apply relative md:h-screen h-[90vh] w-full;
+    @apply relative md:h-dvh h-[90vh] w-full;
     filter: url("#flt_tag");
   }
 
   .story-img-mask {
-    @apply absolute left-0 top-0 w-full h-full overflow-hidden md:left-[20%] md:top-[-10%] md:w-4/5 md:h-4/5;
+    @apply absolute left-0 top-0 size-full overflow-hidden md:left-[20%] md:top-[-10%] md:size-4/5;
     clip-path: polygon(4% 0, 83% 21%, 100% 73%, 0% 100%);
   }
 
   .story-img-content {
-    @apply absolute w-full md:h-screen h-[50vh] opacity-100 left-10 top-16 md:left-0 md:top-10 lg:left-[-300px] lg:top-[-100px];
+    @apply absolute w-full md:h-dvh h-[50dvh] opacity-100 left-10 top-16 md:left-0 md:top-10 lg:left-[-300px] lg:top-[-100px];
     transform: translate3d(0, 0, 0) rotateX(0) rotateY(0) rotateZ(0) scale(1);
   }
 
   .gallery-img-container {
-    @apply w-64 h-64 overflow-hidden bg-violet-300;
+    @apply size-64 overflow-hidden bg-violet-300;
   }
 
   .gallery-img {
-    @apply w-full h-full bg-cover;
+    @apply size-full bg-cover;
   }
 
   .gallery-img-4 {
-    @apply sm:w-80 sm:h-80 md:h-96 md:w-[25rem] rounded-lg;
+    @apply sm:size-80 md:h-96 md:w-[25rem] rounded-lg;
   }
 
   .sword-man-clip-path {
@@ -167,7 +167,8 @@ body {
   }
 }
 
-/* Loader animation styles */
+/* From Uiverse.io by G4b413l */
+/* https://uiverse.io/G4b413l/tidy-walrus-92 */
 .three-body {
   --uib-size: 35px;
   --uib-speed: 0.8s;
