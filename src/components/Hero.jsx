@@ -24,14 +24,10 @@ const Hero = () => {
   };
 
   useEffect(() => {
-    if (loadedVideos >= totalVideos - 1) {
+    if (loadedVideos === totalVideos - 1) {
       setLoading(false);
-    } else {
-      // Fallback timeout in case videos take too long to load
-      const timer = setTimeout(() => setLoading(false), 5000);
-      return () => clearTimeout(timer);
     }
-  }, [loadedVideos, totalVideos]);
+  }, [loadedVideos]);
 
   const handleMiniVdClick = () => {
     setHasClicked(true);
@@ -84,13 +80,13 @@ const Hero = () => {
     });
   });
 
-  const getVideoSrc = (index) => `/videos/hero-${index}.mp4`;
+  const getVideoSrc = (index) => `videos/hero-${index}.mp4`;
 
   return (
-    <div className="relative h-screen w-screen overflow-x-hidden">
+    <div className="relative h-dvh w-screen overflow-x-hidden">
       {loading && (
-        <div className="hero-loading">
-          {/* Loading animation */}
+        <div className="flex-center absolute z-[100] h-dvh w-screen overflow-hidden bg-violet-50">
+          {/* https://uiverse.io/G4b413l/tidy-walrus-92 */}
           <div className="three-body">
             <div className="three-body__dot"></div>
             <div className="three-body__dot"></div>
@@ -99,22 +95,24 @@ const Hero = () => {
         </div>
       )}
 
-      <div id="video-frame" className="hero-video-frame">
-        <div className="hero-video-container">
-          <div className="mask-clip-path hero-mini-video-container">
+      <div
+        id="video-frame"
+        className="relative z-10 h-dvh w-screen overflow-hidden rounded-lg bg-blue-75"
+      >
+        <div>
+          <div className="mask-clip-path absolute-center absolute z-50 size-64 cursor-pointer overflow-hidden rounded-lg">
             <VideoPreview>
               <div
                 onClick={handleMiniVdClick}
-                className="hero-mini-video"
+                className="origin-center scale-50 opacity-0 transition-all duration-500 ease-in hover:scale-100 hover:opacity-100"
               >
                 <video
                   ref={nextVdRef}
                   src={getVideoSrc((currentIndex % totalVideos) + 1)}
                   loop
                   muted
-                  playsInline
                   id="current-video"
-                  className="w-64 h-64 origin-center scale-150 object-cover object-center"
+                  className="size-64 origin-center scale-150 object-cover object-center"
                   onLoadedData={handleVideoLoad}
                 />
               </div>
@@ -126,9 +124,8 @@ const Hero = () => {
             src={getVideoSrc(currentIndex)}
             loop
             muted
-            playsInline
             id="next-video"
-            className="hero-next-video"
+            className="absolute-center invisible absolute z-20 size-64 object-cover object-center"
             onLoadedData={handleVideoLoad}
           />
           <video
@@ -138,8 +135,7 @@ const Hero = () => {
             autoPlay
             loop
             muted
-            playsInline
-            className="hero-main-video"
+            className="absolute left-0 top-0 size-full object-cover object-center"
             onLoadedData={handleVideoLoad}
           />
         </div>
@@ -148,23 +144,21 @@ const Hero = () => {
           G<b>A</b>MING
         </h1>
 
-        <div className="absolute left-0 top-0 z-40 w-full h-full">
+        <div className="absolute left-0 top-0 z-40 size-full">
           <div className="mt-24 px-5 sm:px-10">
             <h1 className="special-font hero-heading text-blue-100">
               redefi<b>n</b>e
             </h1>
 
-            <p className="mb-5 max-w-md font-robert-regular text-blue-100">
-              Enter the Metagame
-              <br />
-              Unleash the Play Economy
+            <p className="mb-5 max-w-64 font-robert-regular text-blue-100">
+              Enter the Metagame<br />Unleash the Play Economy
             </p>
 
             <Button
               id="watch-trailer"
               title="Watch trailer"
               leftIcon={<TiLocationArrow />}
-              containerClass="hero-button"
+              containerClass="bg-yellow-300 flex-center gap-1"
             />
           </div>
         </div>
