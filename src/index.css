@@ -72,6 +72,21 @@ body {
     @apply uppercase font-zentry font-black text-5xl sm:right-10 sm:text-7xl md:text-9xl lg:text-[12rem];
   }
 
+  /* Added missing custom utility classes */
+  .h-dvh {
+    height: 100dvh;
+  }
+
+  .size-64 {
+    width: 16rem; /* 64 x 0.25rem */
+    height: 16rem;
+  }
+
+  .size-full {
+    width: 100%;
+    height: 100%;
+  }
+
   .about-subtext {
     @apply absolute bottom-[-80dvh] left-1/2 w-full max-w-96 -translate-x-1/2 text-center font-circular-web text-lg md:max-w-[34rem];
   }
