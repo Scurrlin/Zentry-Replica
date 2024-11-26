@@ -137,6 +137,7 @@ const Hero = () => {
             autoPlay
             loop
             muted
+            playsInline
             className="absolute left-0 top-0 size-full object-cover object-center"
             onLoadedData={handleVideoLoad}
           />
@@ -153,7 +154,9 @@ const Hero = () => {
             </h1>
 
             <p className="mb-5 max-w-64 font-robert-regular text-blue-100">
-              Enter the Metagame<br />Unleash the Play Economy
+              Enter the Metagame
+              <br />
+              Unleash the Play Economy
             </p>
 
             <Button
