@@ -87,9 +87,9 @@ const Hero = () => {
   const getVideoSrc = (index) => `/videos/hero-${index}.mp4`;
 
   return (
-    <div className="relative h-screen w-screen overflow-x-hidden">
+    <div className="hero-section relative h-screen w-screen overflow-x-hidden">
       {loading && (
-        <div className="flex-center absolute z-[100] h-screen w-screen overflow-hidden bg-violet-50">
+        <div className="hero-loading">
           {/* Loading animation */}
           <div className="three-body">
             <div className="three-body__dot"></div>
@@ -99,16 +99,13 @@ const Hero = () => {
         </div>
       )}
 
-      <div
-        id="video-frame"
-        className="relative z-10 h-screen w-screen overflow-hidden rounded-lg bg-blue-75"
-      >
-        <div>
-          <div className="mask-clip-path absolute-center absolute z-50 w-64 h-64 cursor-pointer overflow-hidden rounded-lg">
+      <div id="video-frame" className="hero-video-frame">
+        <div className="hero-video-container">
+          <div className="mask-clip-path hero-mini-video-container">
             <VideoPreview>
               <div
                 onClick={handleMiniVdClick}
-                className="origin-center scale-50 opacity-0 transition-all duration-500 ease-in hover:scale-100 hover:opacity-100"
+                className="hero-mini-video"
               >
                 <video
                   ref={nextVdRef}
@@ -131,7 +128,7 @@ const Hero = () => {
             muted
             playsInline
             id="next-video"
-            className="absolute-center invisible absolute z-20 w-64 h-64 object-cover object-center"
+            className="hero-next-video"
             onLoadedData={handleVideoLoad}
           />
           <video
@@ -142,7 +139,7 @@ const Hero = () => {
             loop
             muted
             playsInline
-            className="absolute left-0 top-0 w-full h-full object-cover object-center"
+            className="hero-main-video"
             onLoadedData={handleVideoLoad}
           />
         </div>
@@ -167,7 +164,7 @@ const Hero = () => {
               id="watch-trailer"
               title="Watch trailer"
               leftIcon={<TiLocationArrow />}
-              containerClass="bg-yellow-300 flex-center gap-1"
+              containerClass="hero-button"
             />
           </div>
         </div>
