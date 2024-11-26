@@ -38,58 +38,57 @@ body {
   }
 }
 
-/* Scoped styles for the hero section */
-.hero-section {
-  /* Hero-specific utility classes */
+/* Hero Section Styles */
 
-  .hero-loading {
-    @apply flex items-center justify-center absolute z-[100] h-screen w-screen overflow-hidden bg-violet-50;
-  }
+/* Hero-specific utility classes */
 
-  .hero-video-frame {
-    @apply relative z-10 h-screen w-screen overflow-hidden rounded-lg bg-blue-75;
-  }
+.hero-loading {
+  @apply flex items-center justify-center absolute z-[100] h-screen w-screen overflow-hidden bg-violet-50;
+}
 
-  .hero-video-container {
-    /* Add any specific styles if needed */
-  }
+.hero-video-frame {
+  @apply relative z-10 h-screen w-screen overflow-hidden rounded-lg bg-blue-75;
+}
 
-  .hero-mini-video-container {
-    @apply absolute hero-absolute-center z-50 w-64 h-64 cursor-pointer overflow-hidden rounded-lg;
-  }
+.hero-video-container {
+  /* Add any specific styles if needed */
+}
 
-  .hero-mini-video {
-    @apply origin-center scale-50 opacity-0 transition-all duration-500 ease-in hover:scale-100 hover:opacity-100;
-  }
+.hero-mini-video-container {
+  @apply absolute hero-absolute-center z-50 w-64 h-64 cursor-pointer overflow-hidden rounded-lg;
+}
 
-  .hero-next-video {
-    @apply hero-absolute-center invisible absolute z-20 w-64 h-64 object-cover object-center;
-  }
+.hero-mini-video {
+  @apply origin-center scale-50 opacity-0 transition-all duration-500 ease-in hover:scale-100 hover:opacity-100;
+}
 
-  .hero-main-video {
-    @apply absolute left-0 top-0 w-full h-full object-cover object-center;
-  }
+.hero-next-video {
+  @apply hero-absolute-center invisible absolute z-20 w-64 h-64 object-cover object-center;
+}
 
-  .hero-heading {
-    @apply uppercase font-zentry font-black text-4xl sm:right-10 sm:text-5xl md:text-7xl lg:text-9xl;
-  }
+.hero-main-video {
+  @apply absolute left-0 top-0 w-full h-full object-cover object-center;
+}
 
-  .hero-button {
-    @apply bg-yellow-300 flex items-center justify-center gap-1;
-  }
+.hero-heading {
+  @apply uppercase font-zentry font-black text-4xl sm:right-10 sm:text-5xl md:text-7xl lg:text-9xl;
+}
 
-  .special-font b {
-    font-family: "Zentry";
-    font-feature-settings: "ss01" on;
-  }
+.hero-button {
+  @apply bg-yellow-300 flex items-center justify-center gap-1;
+}
 
-  .hero-absolute-center {
-    @apply absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2;
-  }
+.special-font b {
+  font-family: "Zentry";
+  font-feature-settings: "ss01" on;
+}
 
-  .mask-clip-path {
-    clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%);
-  }
+.hero-absolute-center {
+  @apply absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2;
+}
+
+.mask-clip-path {
+  clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%);
 }
 
 /* Loader animation styles */

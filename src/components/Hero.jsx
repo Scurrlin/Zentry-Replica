@@ -87,7 +87,7 @@ const Hero = () => {
   const getVideoSrc = (index) => `/videos/hero-${index}.mp4`;
 
   return (
-    <div className="hero-section relative h-screen w-screen overflow-x-hidden">
+    <div className="relative h-screen w-screen overflow-x-hidden">
       {loading && (
         <div className="hero-loading">
           {/* Loading animation */}
