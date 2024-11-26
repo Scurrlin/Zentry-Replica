@@ -3,7 +3,7 @@
 ![banner_image](src/assets/p3.jpg)
 
 ## Check it out!
-[Live Site](https://iphone-15-pr0.vercel.app/)
+[Live Site](https://zentry-replica.vercel.app//)
 
 ## Technologies Used
 * ReactJS
