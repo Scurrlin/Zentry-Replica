@@ -124,7 +124,7 @@ const Hero = () => {
           <video
             ref={nextVdRef}
             src={getVideoSrc(currentIndex)}
-            //autoPlay
+            autoPlay
             loop
             muted
             playsInline
