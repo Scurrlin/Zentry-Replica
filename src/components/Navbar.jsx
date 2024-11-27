@@ -81,12 +81,6 @@ const NavBar = () => {
               rightIcon={<TiLocationArrow />}
               containerClass="bg-blue-50 md:flex hidden items-center justify-center gap-1"
             />
-
-            {/*<Button
-              id="product-button"
-              title="Whitepaper"
-              containerClass="bg-blue-50 md:flex hidden items-center justify-center gap-1"
-            />*/}
           </div>
 
           {/* Navigation Links and Audio Button */}
