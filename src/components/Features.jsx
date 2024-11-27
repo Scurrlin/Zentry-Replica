@@ -164,7 +164,7 @@ const Features = () => (
           />
         </BentoTilt>
 
-        <BentoTilt className="bento-tilt_2">
+        <BentoTilt className="bento-tilt_2 md:col-start-1 md:col-span-1 md:row-start-3">
           <div className="flex size-full flex-col justify-between bg-violet-300 p-5">
             <h1 className="bento-title special-font max-w-64 text-black">
               M<b>o</b>re co<b>m</b>ing s<b>o</b>on.
@@ -174,7 +174,7 @@ const Features = () => (
           </div>
         </BentoTilt>
 
-        <BentoTilt className="bento-tilt_2">
+        <BentoTilt className="bento-tilt_2 md:col-start-2 md:col-span-1 md:row-start-3">
           <video
             src="videos/feature-5.mp4"
             loop
