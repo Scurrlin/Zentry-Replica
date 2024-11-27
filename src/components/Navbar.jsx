@@ -71,7 +71,9 @@ const NavBar = () => {
         <nav className="flex size-full items-center justify-between p-4">
           {/* Logo and Product button */}
           <div className="flex items-center gap-7">
-            <img src="/img/logo.png" alt="logo" className="w-10" />
+            <a href="#top">
+              <img src="/img/logo.png" alt="logo" className="w-10" />
+            </a>
 
             <Button
               id="product-button"
@@ -80,11 +82,11 @@ const NavBar = () => {
               containerClass="bg-blue-50 md:flex hidden items-center justify-center gap-1"
             />
 
-            <Button
+            {/*<Button
               id="product-button"
               title="Whitepaper"
               containerClass="bg-blue-50 md:flex hidden items-center justify-center gap-1"
-            />
+            />*/}
           </div>
 
           {/* Navigation Links and Audio Button */}
