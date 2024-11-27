@@ -125,7 +125,7 @@ const Features = () => (
       </BentoTilt>
 
       <div className="grid h-[135vh] w-full grid-cols-2 grid-rows-3 gap-7">
-        <BentoTilt className="bento-tilt_1 col-span-1 md:col-start-1 md:row-span-2">
+        <BentoTilt className="bento-tilt_1 row-span-1 md:col-span-1 md:row-span-2">
           <BentoCard
             src="videos/feature-2.mp4"
             title={
@@ -138,7 +138,7 @@ const Features = () => (
           />
         </BentoTilt>
 
-        <BentoTilt className="bento-tilt_1 col-span-1 md:col-start-2 md:row-start-1">
+        <BentoTilt className="bento-tilt_1 row-span-1 col-span-2 md:col-span-1 ms-0 md:ms-32">
           <BentoCard
             src="videos/feature-3.mp4"
             title={
@@ -151,7 +151,7 @@ const Features = () => (
           />
         </BentoTilt>
 
-        <BentoTilt className="bento-tilt_1 col-span-1 md:col-start-2 md:row-start-2">
+        <BentoTilt className="bento-tilt_1 row-span-1 col-span-2 md:col-span-1 me-0 md:me-14">
           <BentoCard
             src="videos/feature-4.mp4"
             title={
