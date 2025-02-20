@@ -11,15 +11,14 @@ gsap.registerPlugin(ScrollTrigger);
 
 const Hero = () => {
   const totalVideos = 4;
-
-  // bgIndex is the video currently playing in the background.
-  // previewIndex is the next video shown in the center preview.
-  const [bgIndex, setBgIndex] = useState(1);
-  const [previewIndex, setPreviewIndex] = useState(2);
+  // Background video index and preview (next) video index – videos are 0-indexed.
+  const [bgIndex, setBgIndex] = useState(0);
+  const [previewIndex, setPreviewIndex] = useState(1);
   const [hasClicked, setHasClicked] = useState(false);
   const [loading, setLoading] = useState(true);
   const [loadedVideos, setLoadedVideos] = useState(0);
 
+  // Separate refs for the background and preview video elements.
   const bgVdRef = useRef(null);
   const previewVdRef = useRef(null);
 
@@ -31,30 +30,29 @@ const Hero = () => {
     if (loadedVideos === totalVideos - 1) {
       setLoading(false);
     }
-  }, [loadedVideos, totalVideos]);
+  }, [loadedVideos]);
 
   // When the preview is clicked, start the transition.
   const handleMiniVdClick = () => {
-    if (!hasClicked) {
-      setHasClicked(true);
-    }
+    setHasClicked(true);
   };
 
   useGSAP(
     () => {
       if (hasClicked) {
-        // Create a timeline that expands the preview video,
-        // then fades out the background video.
         const tl = gsap.timeline({
           onComplete: () => {
-            // Once the preview has expanded and bg video faded out,
-            // update the background to be the preview video,
-            // and calculate the next preview video.
-            gsap.set("#bg-video", { opacity: 1 });
-            // Optionally, reset the preview video to its initial (hover) state.
-            gsap.set("#preview-video", { scale: 0.5, width: "auto", height: "auto" });
+            // After transition: make preview video the new background,
+            // update the preview to the next video in cycle, and reset styles.
             setBgIndex(previewIndex);
-            setPreviewIndex((previewIndex % totalVideos) + 1);
+            setPreviewIndex((previewIndex + 1) % totalVideos);
+            gsap.set("#bg-video", { opacity: 1 });
+            gsap.set("#preview-video", {
+              scale: 0.5,
+              width: "auto",
+              height: "auto",
+              visibility: "hidden",
+            });
             setHasClicked(false);
           },
         });
@@ -108,6 +106,7 @@ const Hero = () => {
     <div className="relative h-dvh w-screen overflow-x-hidden">
       {loading && (
         <div className="flex-center absolute z-[100] h-dvh w-screen overflow-hidden bg-violet-50">
+          {/* https://uiverse.io/G4b413l/tidy-walrus-92 */}
           <div className="three-body">
             <div className="three-body__dot"></div>
             <div className="three-body__dot"></div>
@@ -121,7 +120,7 @@ const Hero = () => {
         className="relative z-10 h-dvh w-screen overflow-hidden rounded-lg bg-blue-75"
       >
         <div>
-          {/* Preview video: shows the next video in the cycle */}
+          {/* Preview video: this is the center video that expands on click */}
           <div className="mask-clip-path absolute-center absolute z-50 size-64 cursor-pointer overflow-hidden rounded-lg">
             <VideoPreview>
               <div
@@ -143,7 +142,7 @@ const Hero = () => {
             </VideoPreview>
           </div>
 
-          {/* Background video: shows the current video playing */}
+          {/* Background video: this is the full-screen video that remains until transition completes */}
           <video
             ref={bgVdRef}
             src={getVideoSrc(bgIndex)}
@@ -166,11 +165,11 @@ const Hero = () => {
             <h1 className="special-font hero-heading text-blue-100">
               redefi<b>n</b>e
             </h1>
-
             <p className="mb-5 max-w-64 font-robert-regular text-blue-100">
-              Enter the Metagame<br />Unleash the Play Economy
+              Enter the Metagame
+              <br />
+              Unleash the Play Economy
             </p>
-
             <Button
               id="watch-trailer"
               title="Watch trailer"
