@@ -10,69 +10,56 @@ import VideoPreview from "./VideoPreview";
 gsap.registerPlugin(ScrollTrigger);
 
 const Hero = () => {
-  // We assume videos are 0-indexed.
-  const totalVideos = 4;
-  const [currentIndex, setCurrentIndex] = useState(0);
+  const [currentIndex, setCurrentIndex] = useState(1);
   const [hasClicked, setHasClicked] = useState(false);
+
   const [loading, setLoading] = useState(true);
   const [loadedVideos, setLoadedVideos] = useState(0);
 
-  // Separate refs for background (current) and preview (next) video elements.
-  const backgroundVideoRef = useRef(null);
-  const previewVideoRef = useRef(null);
+  const totalVideos = 4;
+  const nextVdRef = useRef(null);
 
   const handleVideoLoad = () => {
     setLoadedVideos((prev) => prev + 1);
   };
 
   useEffect(() => {
-    if (loadedVideos >= totalVideos - 1) {
+    if (loadedVideos === totalVideos - 1) {
       setLoading(false);
     }
   }, [loadedVideos]);
 
-  // When the preview video is clicked, trigger the takeover.
   const handleMiniVdClick = () => {
     setHasClicked(true);
+
+    setCurrentIndex((prevIndex) => (prevIndex % totalVideos) + 1);
   };
 
   useGSAP(
     () => {
       if (hasClicked) {
-        const tl = gsap.timeline({
-          onComplete: () => {
-            // Once the animation is complete, update currentIndex so the preview becomes the new background.
-            setCurrentIndex((prev) => (prev + 1) % totalVideos);
-            // Reset styles for the next cycle.
-            gsap.set("#background-video", { opacity: 1 });
-            gsap.set("#preview-video", { visibility: "hidden", scale: 0.5, width: "auto", height: "auto" });
-            setHasClicked(false);
-          },
+        gsap.set("#next-video", { visibility: "visible" });
+        gsap.to("#next-video", {
+          transformOrigin: "center center",
+          scale: 1,
+          width: "100%",
+          height: "100%",
+          duration: 1,
+          ease: "power1.inOut",
+          onStart: () => nextVdRef.current.play(),
         });
-        tl.set("#preview-video", { visibility: "visible" })
-          .to("#preview-video", {
-            transformOrigin: "center center",
-            scale: 1,
-            width: "100%",
-            height: "100%",
-            duration: 1,
-            ease: "power1.inOut",
-            onStart: () => {
-              if (previewVideoRef.current) previewVideoRef.current.play();
-            },
-          })
-          .to(
-            "#background-video",
-            {
-              opacity: 0,
-              duration: 0.5,
-              ease: "power1.inOut",
-            },
-            ">"
-          );
+        gsap.from("#current-video", {
+          transformOrigin: "center center",
+          scale: 0,
+          duration: 1.5,
+          ease: "power1.inOut",
+        });
       }
     },
-    { dependencies: [hasClicked] }
+    {
+      dependencies: [currentIndex],
+      revertOnUpdate: true,
+    }
   );
 
   useGSAP(() => {
@@ -99,6 +86,7 @@ const Hero = () => {
     <div className="relative h-dvh w-screen overflow-x-hidden">
       {loading && (
         <div className="flex-center absolute z-[100] h-dvh w-screen overflow-hidden bg-violet-50">
+          {/* https://uiverse.io/G4b413l/tidy-walrus-92 */}
           <div className="three-body">
             <div className="three-body__dot"></div>
             <div className="three-body__dot"></div>
@@ -107,9 +95,11 @@ const Hero = () => {
         </div>
       )}
 
-      <div id="video-frame" className="relative z-10 h-dvh w-screen overflow-hidden rounded-lg bg-blue-75">
+      <div
+        id="video-frame"
+        className="relative z-10 h-dvh w-screen overflow-hidden rounded-lg bg-blue-75"
+      >
         <div>
-          {/* Preview Video: Initially a small video in the center that expands on click */}
           <div className="mask-clip-path absolute-center absolute z-50 size-64 cursor-pointer overflow-hidden rounded-lg">
             <VideoPreview>
               <div
@@ -117,13 +107,13 @@ const Hero = () => {
                 className="origin-center scale-50 opacity-0 transition-all duration-500 ease-in hover:scale-100 hover:opacity-100"
               >
                 <video
-                  ref={previewVideoRef}
-                  src={getVideoSrc((currentIndex + 1) % totalVideos)}
+                  ref={nextVdRef}
+                  src={getVideoSrc((currentIndex % totalVideos) + 1)}
                   loop
                   muted
                   autoPlay
                   playsInline
-                  id="preview-video"
+                  id="current-video"
                   className="size-64 origin-center scale-150 object-cover object-center"
                   onLoadedData={handleVideoLoad}
                 />
@@ -131,15 +121,25 @@ const Hero = () => {
             </VideoPreview>
           </div>
 
-          {/* Background Video: Currently playing full-screen video */}
           <video
-            ref={backgroundVideoRef}
+            ref={nextVdRef}
             src={getVideoSrc(currentIndex)}
             loop
             muted
             autoPlay
             playsInline
-            id="background-video"
+            id="next-video"
+            className="absolute-center invisible absolute z-20 size-64 object-cover object-center"
+            onLoadedData={handleVideoLoad}
+          />
+          <video
+            src={getVideoSrc(
+              currentIndex === totalVideos - 1 ? 1 : currentIndex
+            )}
+            loop
+            muted
+            autoPlay
+            playsInline
             className="absolute left-0 top-0 size-full object-cover object-center"
             onLoadedData={handleVideoLoad}
           />
@@ -154,9 +154,11 @@ const Hero = () => {
             <h1 className="special-font hero-heading text-blue-100">
               redefi<b>n</b>e
             </h1>
+
             <p className="mb-5 max-w-64 font-robert-regular text-blue-100">
               Enter the Metagame<br />Unleash the Play Economy
             </p>
+
             <Button
               id="watch-trailer"
               title="Watch trailer"
