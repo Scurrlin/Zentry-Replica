@@ -12,6 +12,7 @@ gsap.registerPlugin(ScrollTrigger);
 const Hero = () => {
   const [currentIndex, setCurrentIndex] = useState(1);
   const [hasClicked, setHasClicked] = useState(false);
+
   const [loading, setLoading] = useState(true);
   const [loadedVideos, setLoadedVideos] = useState(0);
 
@@ -30,6 +31,7 @@ const Hero = () => {
 
   const handleMiniVdClick = () => {
     setHasClicked(true);
+
     setCurrentIndex((prevIndex) => (prevIndex % totalVideos) + 1);
   };
 
@@ -46,10 +48,10 @@ const Hero = () => {
           ease: "power1.inOut",
           onStart: () => nextVdRef.current.play(),
         });
-        // Instead of scaling #current-video from 0, fade it out:
-        gsap.to("#current-video", {
-          opacity: 0,
-          duration: 0.5,
+        gsap.from("#current-video", {
+          transformOrigin: "center center",
+          scale: 0,
+          duration: 1.5,
           ease: "power1.inOut",
         });
       }
@@ -84,6 +86,7 @@ const Hero = () => {
     <div className="relative h-dvh w-screen overflow-x-hidden">
       {loading && (
         <div className="flex-center absolute z-[100] h-dvh w-screen overflow-hidden bg-violet-50">
+          {/* https://uiverse.io/G4b413l/tidy-walrus-92 */}
           <div className="three-body">
             <div className="three-body__dot"></div>
             <div className="three-body__dot"></div>
@@ -151,9 +154,11 @@ const Hero = () => {
             <h1 className="special-font hero-heading text-blue-100">
               redefi<b>n</b>e
             </h1>
+
             <p className="mb-5 max-w-64 font-robert-regular text-blue-100">
               Enter the Metagame<br />Unleash the Play Economy
             </p>
+
             <Button
               id="watch-trailer"
               title="Watch trailer"
