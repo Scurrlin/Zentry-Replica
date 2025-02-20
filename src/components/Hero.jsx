@@ -12,12 +12,12 @@ gsap.registerPlugin(ScrollTrigger);
 const Hero = () => {
   const [currentIndex, setCurrentIndex] = useState(1);
   const [hasClicked, setHasClicked] = useState(false);
+
   const [loading, setLoading] = useState(true);
   const [loadedVideos, setLoadedVideos] = useState(0);
 
   const totalVideos = 4;
   const nextVdRef = useRef(null);
-  const currentVdRef = useRef(null);
 
   const handleVideoLoad = () => {
     setLoadedVideos((prev) => prev + 1);
@@ -31,47 +31,35 @@ const Hero = () => {
 
   const handleMiniVdClick = () => {
     setHasClicked(true);
+
+    setCurrentIndex((prevIndex) => (prevIndex % totalVideos) + 1);
   };
 
   useGSAP(
     () => {
       if (hasClicked) {
-        const tl = gsap.timeline({
-          onComplete: () => {
-            // Only update index AFTER the animation is fully complete
-            setCurrentIndex((prevIndex) => (prevIndex % totalVideos) + 1);
-            gsap.set("#current-video", { opacity: 1 });
-            setHasClicked(false);
-          },
+        gsap.set("#next-video", { visibility: "visible" });
+        gsap.to("#next-video", {
+          transformOrigin: "center center",
+          scale: 1,
+          width: "100%",
+          height: "100%",
+          duration: 1,
+          ease: "power1.inOut",
+          onStart: () => nextVdRef.current.play(),
         });
-
-        // 1. Make next video visible and expand it
-        tl.set("#next-video", { visibility: "visible" })
-          .to("#next-video", {
-            transformOrigin: "center center",
-            scale: 1,
-            width: "100%",
-            height: "100%",
-            duration: 1,
-            ease: "power1.inOut",
-            onStart: () => {
-              if (nextVdRef.current) nextVdRef.current.play();
-            },
-          })
-          // 2. Fade out the current video *after* expansion completes
-          .to("#current-video", {
-            opacity: 0,
-            duration: 0.5,
-            ease: "power1.inOut",
-          });
-
-        // Ensure the current video keeps playing during the transition
-        if (currentVdRef.current) {
-          currentVdRef.current.play();
-        }
+        gsap.from("#current-video", {
+          transformOrigin: "center center",
+          scale: 0,
+          duration: 1.5,
+          ease: "power1.inOut",
+        });
       }
     },
-    { dependencies: [hasClicked] }
+    {
+      dependencies: [currentIndex],
+      revertOnUpdate: true,
+    }
   );
 
   useGSAP(() => {
@@ -98,6 +86,7 @@ const Hero = () => {
     <div className="relative h-dvh w-screen overflow-x-hidden">
       {loading && (
         <div className="flex-center absolute z-[100] h-dvh w-screen overflow-hidden bg-violet-50">
+          {/* https://uiverse.io/G4b413l/tidy-walrus-92 */}
           <div className="three-body">
             <div className="three-body__dot"></div>
             <div className="three-body__dot"></div>
@@ -111,7 +100,6 @@ const Hero = () => {
         className="relative z-10 h-dvh w-screen overflow-hidden rounded-lg bg-blue-75"
       >
         <div>
-          {/* Preview Video: Expands when clicked */}
           <div className="mask-clip-path absolute-center absolute z-50 size-64 cursor-pointer overflow-hidden rounded-lg">
             <VideoPreview>
               <div
@@ -125,7 +113,7 @@ const Hero = () => {
                   muted
                   autoPlay
                   playsInline
-                  id="next-video"
+                  id="current-video"
                   className="size-64 origin-center scale-150 object-cover object-center"
                   onLoadedData={handleVideoLoad}
                 />
@@ -133,15 +121,25 @@ const Hero = () => {
             </VideoPreview>
           </div>
 
-          {/* Background Video: Plays until preview is fully expanded */}
           <video
-            ref={currentVdRef}
+            ref={nextVdRef}
             src={getVideoSrc(currentIndex)}
             loop
             muted
             autoPlay
             playsInline
-            id="current-video"
+            id="next-video"
+            className="absolute-center invisible absolute z-20 size-64 object-cover object-center"
+            onLoadedData={handleVideoLoad}
+          />
+          <video
+            src={getVideoSrc(
+              currentIndex === totalVideos - 1 ? 1 : currentIndex
+            )}
+            loop
+            muted
+            autoPlay
+            playsInline
             className="absolute left-0 top-0 size-full object-cover object-center"
             onLoadedData={handleVideoLoad}
           />
@@ -156,9 +154,11 @@ const Hero = () => {
             <h1 className="special-font hero-heading text-blue-100">
               redefi<b>n</b>e
             </h1>
+
             <p className="mb-5 max-w-64 font-robert-regular text-blue-100">
               Enter the Metagame<br />Unleash the Play Economy
             </p>
+
             <Button
               id="watch-trailer"
               title="Watch trailer"
