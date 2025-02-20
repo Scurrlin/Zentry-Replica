@@ -10,17 +10,14 @@ import VideoPreview from "./VideoPreview";
 gsap.registerPlugin(ScrollTrigger);
 
 const Hero = () => {
-  const totalVideos = 4;
-  // Background video index and preview (next) video index – videos are 0-indexed.
-  const [bgIndex, setBgIndex] = useState(0);
-  const [previewIndex, setPreviewIndex] = useState(1);
+  const [currentIndex, setCurrentIndex] = useState(1);
   const [hasClicked, setHasClicked] = useState(false);
+
   const [loading, setLoading] = useState(true);
   const [loadedVideos, setLoadedVideos] = useState(0);
 
-  // Separate refs for the background and preview video elements.
-  const bgVdRef = useRef(null);
-  const previewVdRef = useRef(null);
+  const totalVideos = 4;
+  const nextVdRef = useRef(null);
 
   const handleVideoLoad = () => {
     setLoadedVideos((prev) => prev + 1);
@@ -32,54 +29,37 @@ const Hero = () => {
     }
   }, [loadedVideos]);
 
-  // When the preview is clicked, start the transition.
   const handleMiniVdClick = () => {
     setHasClicked(true);
+
+    setCurrentIndex((prevIndex) => (prevIndex % totalVideos) + 1);
   };
 
   useGSAP(
     () => {
       if (hasClicked) {
-        const tl = gsap.timeline({
-          onComplete: () => {
-            // After transition: make preview video the new background,
-            // update the preview to the next video in cycle, and reset styles.
-            setBgIndex(previewIndex);
-            setPreviewIndex((previewIndex + 1) % totalVideos);
-            gsap.set("#bg-video", { opacity: 1 });
-            gsap.set("#preview-video", {
-              scale: 0.5,
-              width: "auto",
-              height: "auto",
-              visibility: "hidden",
-            });
-            setHasClicked(false);
-          },
+        gsap.set("#next-video", { visibility: "visible" });
+        gsap.to("#next-video", {
+          transformOrigin: "center center",
+          scale: 1,
+          width: "100%",
+          height: "100%",
+          duration: 1,
+          ease: "power1.inOut",
+          onStart: () => nextVdRef.current.play(),
         });
-        tl.set("#preview-video", { visibility: "visible" })
-          .to("#preview-video", {
-            transformOrigin: "center center",
-            scale: 1,
-            width: "100%",
-            height: "100%",
-            duration: 1,
-            ease: "power1.inOut",
-            onStart: () => {
-              if (previewVdRef.current) previewVdRef.current.play();
-            },
-          })
-          .to(
-            "#bg-video",
-            {
-              opacity: 0,
-              duration: 0.5,
-              ease: "power1.inOut",
-            },
-            ">"
-          );
+        gsap.from("#current-video", {
+          transformOrigin: "center center",
+          scale: 0,
+          duration: 1.5,
+          ease: "power1.inOut",
+        });
       }
     },
-    { dependencies: [hasClicked, previewIndex] }
+    {
+      dependencies: [currentIndex],
+      revertOnUpdate: true,
+    }
   );
 
   useGSAP(() => {
@@ -120,7 +100,6 @@ const Hero = () => {
         className="relative z-10 h-dvh w-screen overflow-hidden rounded-lg bg-blue-75"
       >
         <div>
-          {/* Preview video: this is the center video that expands on click */}
           <div className="mask-clip-path absolute-center absolute z-50 size-64 cursor-pointer overflow-hidden rounded-lg">
             <VideoPreview>
               <div
@@ -128,13 +107,13 @@ const Hero = () => {
                 className="origin-center scale-50 opacity-0 transition-all duration-500 ease-in hover:scale-100 hover:opacity-100"
               >
                 <video
-                  ref={previewVdRef}
-                  src={getVideoSrc(previewIndex)}
+                  ref={nextVdRef}
+                  src={getVideoSrc((currentIndex % totalVideos) + 1)}
                   loop
                   muted
                   autoPlay
                   playsInline
-                  id="preview-video"
+                  id="current-video"
                   className="size-64 origin-center scale-150 object-cover object-center"
                   onLoadedData={handleVideoLoad}
                 />
@@ -142,15 +121,25 @@ const Hero = () => {
             </VideoPreview>
           </div>
 
-          {/* Background video: this is the full-screen video that remains until transition completes */}
           <video
-            ref={bgVdRef}
-            src={getVideoSrc(bgIndex)}
+            ref={nextVdRef}
+            src={getVideoSrc(currentIndex)}
             loop
             muted
             autoPlay
             playsInline
-            id="bg-video"
+            id="next-video"
+            className="absolute-center invisible absolute z-20 size-64 object-cover object-center"
+            onLoadedData={handleVideoLoad}
+          />
+          <video
+            src={getVideoSrc(
+              currentIndex === totalVideos - 1 ? 1 : currentIndex
+            )}
+            loop
+            muted
+            autoPlay
+            playsInline
             className="absolute left-0 top-0 size-full object-cover object-center"
             onLoadedData={handleVideoLoad}
           />
@@ -165,11 +154,11 @@ const Hero = () => {
             <h1 className="special-font hero-heading text-blue-100">
               redefi<b>n</b>e
             </h1>
+
             <p className="mb-5 max-w-64 font-robert-regular text-blue-100">
-              Enter the Metagame
-              <br />
-              Unleash the Play Economy
+              Enter the Metagame<br />Unleash the Play Economy
             </p>
+
             <Button
               id="watch-trailer"
               title="Watch trailer"
