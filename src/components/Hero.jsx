@@ -12,14 +12,12 @@ gsap.registerPlugin(ScrollTrigger);
 const Hero = () => {
   const [currentIndex, setCurrentIndex] = useState(1);
   const [hasClicked, setHasClicked] = useState(false);
+
   const [loading, setLoading] = useState(true);
   const [loadedVideos, setLoadedVideos] = useState(0);
 
   const totalVideos = 4;
-  
-  // Use separate refs for the mini preview (current) and the main (next) video
-  const currentVideoRef = useRef(null);
-  const nextVideoRef = useRef(null);
+  const nextVdRef = useRef(null);
 
   const handleVideoLoad = () => {
     setLoadedVideos((prev) => prev + 1);
@@ -33,27 +31,29 @@ const Hero = () => {
 
   const handleMiniVdClick = () => {
     setHasClicked(true);
+
     setCurrentIndex((prevIndex) => (prevIndex % totalVideos) + 1);
   };
 
-  // Animate the new video expanding smoothly
   useGSAP(
     () => {
-      if (hasClicked && nextVideoRef.current) {
-        // Animate from scale 0 and 0 opacity to full scale and opacity
-        gsap.fromTo(
-          nextVideoRef.current,
-          { scale: 0, autoAlpha: 0 },
-          {
-            scale: 1,
-            autoAlpha: 1,
-            width: "100%",
-            height: "100%",
-            duration: 1,
-            ease: "power1.inOut",
-            onStart: () => nextVideoRef.current.play(),
-          }
-        );
+      if (hasClicked) {
+        gsap.set("#next-video", { visibility: "visible" });
+        gsap.to("#next-video", {
+          transformOrigin: "center center",
+          scale: 1,
+          width: "100%",
+          height: "100%",
+          duration: 1,
+          ease: "power1.inOut",
+          onStart: () => nextVdRef.current.play(),
+        });
+        gsap.from("#current-video", {
+          transformOrigin: "center center",
+          scale: 0,
+          duration: 1.5,
+          ease: "power1.inOut",
+        });
       }
     },
     {
@@ -62,7 +62,6 @@ const Hero = () => {
     }
   );
 
-  // Additional clipPath animation for the video container remains unchanged
   useGSAP(() => {
     gsap.set("#video-frame", {
       clipPath: "polygon(14% 0, 72% 0, 88% 90%, 0 95%)",
@@ -87,7 +86,7 @@ const Hero = () => {
     <div className="relative h-dvh w-screen overflow-x-hidden">
       {loading && (
         <div className="flex-center absolute z-[100] h-dvh w-screen overflow-hidden bg-violet-50">
-          {/* Loading animation */}
+          {/* https://uiverse.io/G4b413l/tidy-walrus-92 */}
           <div className="three-body">
             <div className="three-body__dot"></div>
             <div className="three-body__dot"></div>
@@ -108,7 +107,7 @@ const Hero = () => {
                 className="origin-center scale-50 opacity-0 transition-all duration-500 ease-in hover:scale-100 hover:opacity-100"
               >
                 <video
-                  ref={currentVideoRef}
+                  ref={nextVdRef}
                   src={getVideoSrc((currentIndex % totalVideos) + 1)}
                   loop
                   muted
@@ -123,15 +122,14 @@ const Hero = () => {
           </div>
 
           <video
-            ref={nextVideoRef}
+            ref={nextVdRef}
             src={getVideoSrc(currentIndex)}
             loop
             muted
             autoPlay
             playsInline
             id="next-video"
-            // Remove the "invisible" class so GSAP controls the opacity
-            className="absolute-center absolute z-20 size-64 object-cover object-center"
+            className="absolute-center invisible absolute z-20 size-64 object-cover object-center"
             onLoadedData={handleVideoLoad}
           />
           <video
