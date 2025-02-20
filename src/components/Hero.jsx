@@ -12,12 +12,14 @@ gsap.registerPlugin(ScrollTrigger);
 const Hero = () => {
   const [currentIndex, setCurrentIndex] = useState(1);
   const [hasClicked, setHasClicked] = useState(false);
-
   const [loading, setLoading] = useState(true);
   const [loadedVideos, setLoadedVideos] = useState(0);
 
   const totalVideos = 4;
-  const nextVdRef = useRef(null);
+
+  // Separate refs for the preview (clickable/expanding) and background (full-screen) videos
+  const previewVdRef = useRef(null);
+  const bgVdRef = useRef(null);
 
   const handleVideoLoad = () => {
     setLoadedVideos((prev) => prev + 1);
@@ -31,37 +33,47 @@ const Hero = () => {
 
   const handleMiniVdClick = () => {
     setHasClicked(true);
-
     setCurrentIndex((prevIndex) => (prevIndex % totalVideos) + 1);
   };
 
-  useGSAP(
-    () => {
-      if (hasClicked) {
-        gsap.set("#next-video", { visibility: "visible" });
-        gsap.to("#next-video", {
-          transformOrigin: "center center",
-          scale: 1,
-          width: "100%",
-          height: "100%",
-          duration: 1,
-          ease: "power1.inOut",
-          onStart: () => nextVdRef.current.play(),
-        });
-        gsap.from("#current-video", {
-          transformOrigin: "center center",
-          scale: 0,
-          duration: 1.5,
-          ease: "power1.inOut",
-        });
-      }
-    },
-    {
-      dependencies: [currentIndex],
-      revertOnUpdate: true,
-    }
-  );
+  // GSAP animation to expand the preview video and fade out the background video
+  useGSAP(() => {
+    if (hasClicked) {
+      const tl = gsap.timeline({
+        onComplete: () => {
+          if (bgVdRef.current) {
+            bgVdRef.current.pause();
+          }
+        },
+      });
 
+      tl.to(previewVdRef.current, {
+        transformOrigin: "center center",
+        scale: 1,
+        width: "100%",
+        height: "100%",
+        duration: 1,
+        ease: "power1.inOut",
+        onStart: () => {
+          if (previewVdRef.current) previewVdRef.current.play();
+        },
+      })
+        .to(
+          bgVdRef.current,
+          {
+            opacity: 0,
+            duration: 0.5,
+            ease: "power1.inOut",
+          },
+          "-=0.3"
+        );
+    }
+  }, {
+    dependencies: [currentIndex, hasClicked],
+    revertOnUpdate: true,
+  });
+
+  // GSAP clipPath animation remains unchanged
   useGSAP(() => {
     gsap.set("#video-frame", {
       clipPath: "polygon(14% 0, 72% 0, 88% 90%, 0 95%)",
@@ -86,7 +98,6 @@ const Hero = () => {
     <div className="relative h-dvh w-screen overflow-x-hidden">
       {loading && (
         <div className="flex-center absolute z-[100] h-dvh w-screen overflow-hidden bg-violet-50">
-          {/* https://uiverse.io/G4b413l/tidy-walrus-92 */}
           <div className="three-body">
             <div className="three-body__dot"></div>
             <div className="three-body__dot"></div>
@@ -100,6 +111,7 @@ const Hero = () => {
         className="relative z-10 h-dvh w-screen overflow-hidden rounded-lg bg-blue-75"
       >
         <div>
+          {/* Preview Video: Hover preview that expands on click */}
           <div className="mask-clip-path absolute-center absolute z-50 size-64 cursor-pointer overflow-hidden rounded-lg">
             <VideoPreview>
               <div
@@ -107,13 +119,13 @@ const Hero = () => {
                 className="origin-center scale-50 opacity-0 transition-all duration-500 ease-in hover:scale-100 hover:opacity-100"
               >
                 <video
-                  ref={nextVdRef}
+                  ref={previewVdRef}
                   src={getVideoSrc((currentIndex % totalVideos) + 1)}
                   loop
                   muted
                   autoPlay
                   playsInline
-                  id="current-video"
+                  id="preview-video"
                   className="size-64 origin-center scale-150 object-cover object-center"
                   onLoadedData={handleVideoLoad}
                 />
@@ -121,25 +133,15 @@ const Hero = () => {
             </VideoPreview>
           </div>
 
+          {/* Background Full-Screen Video: Remains playing until preview expansion completes */}
           <video
-            ref={nextVdRef}
-            src={getVideoSrc(currentIndex)}
+            ref={bgVdRef}
+            src={getVideoSrc(currentIndex === totalVideos - 1 ? 1 : currentIndex)}
             loop
             muted
             autoPlay
             playsInline
-            id="next-video"
-            className="absolute-center invisible absolute z-20 size-64 object-cover object-center"
-            onLoadedData={handleVideoLoad}
-          />
-          <video
-            src={getVideoSrc(
-              currentIndex === totalVideos - 1 ? 1 : currentIndex
-            )}
-            loop
-            muted
-            autoPlay
-            playsInline
+            id="bg-video"
             className="absolute left-0 top-0 size-full object-cover object-center"
             onLoadedData={handleVideoLoad}
           />
