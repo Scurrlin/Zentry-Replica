@@ -33,24 +33,50 @@ const Hero = () => {
     setCurrentIndex((prevIndex) => (prevIndex % totalVideos) + 1);
   };
 
-  // GSAP animation to expand the video
-  useGSAP(() => {
-    if (hasClicked) {
-      gsap.set("#next-video", { visibility: "visible" });
-      gsap.to("#next-video", {
-        transformOrigin: "center center",
-        scale: 1,
-        width: "100%",
-        height: "100%",
-        duration: 1,
-        ease: "power1.inOut",
-        onStart: () => nextVdRef.current.play(),
-      });
+  useGSAP(
+    () => {
+      if (hasClicked) {
+        // Create a timeline that expands video 2 and then fades out video 1.
+        const tl = gsap.timeline({
+          onComplete: () => {
+            // Optionally pause video 1 after the animation completes.
+            const bgVideo = document.getElementById("bg-video");
+            if (bgVideo) {
+              bgVideo.pause();
+            }
+          },
+        });
+        tl.set("#next-video", { visibility: "visible" })
+          .to("#next-video", {
+            transformOrigin: "center center",
+            scale: 1,
+            width: "100%",
+            height: "100%",
+            duration: 1,
+            ease: "power1.inOut",
+            onStart: () => {
+              if (nextVdRef.current) {
+                nextVdRef.current.play();
+              }
+            },
+          })
+          // After video 2 has fully expanded, fade out video 1 (the background)
+          .to(
+            "#bg-video",
+            {
+              opacity: 0,
+              duration: 0.5,
+              ease: "power1.inOut",
+            },
+            ">"
+          );
+      }
+    },
+    {
+      dependencies: [currentIndex, hasClicked],
+      revertOnUpdate: true,
     }
-  }, {
-    dependencies: [currentIndex],
-    revertOnUpdate: true,
-  });
+  );
 
   useGSAP(() => {
     gsap.set("#video-frame", {
@@ -76,6 +102,7 @@ const Hero = () => {
     <div className="relative h-dvh w-screen overflow-x-hidden">
       {loading && (
         <div className="flex-center absolute z-[100] h-dvh w-screen overflow-hidden bg-violet-50">
+          {/* https://uiverse.io/G4b413l/tidy-walrus-92 */}
           <div className="three-body">
             <div className="three-body__dot"></div>
             <div className="three-body__dot"></div>
@@ -129,6 +156,7 @@ const Hero = () => {
             muted
             autoPlay
             playsInline
+            id="bg-video"
             className="absolute left-0 top-0 size-full object-cover object-center"
             onLoadedData={handleVideoLoad}
           />
