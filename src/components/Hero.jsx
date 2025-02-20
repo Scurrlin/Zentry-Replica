@@ -10,13 +10,18 @@ import VideoPreview from "./VideoPreview";
 gsap.registerPlugin(ScrollTrigger);
 
 const Hero = () => {
-  const [currentIndex, setCurrentIndex] = useState(1);
+  const totalVideos = 4;
+
+  // bgIndex is the video currently playing in the background.
+  // previewIndex is the next video shown in the center preview.
+  const [bgIndex, setBgIndex] = useState(1);
+  const [previewIndex, setPreviewIndex] = useState(2);
   const [hasClicked, setHasClicked] = useState(false);
   const [loading, setLoading] = useState(true);
   const [loadedVideos, setLoadedVideos] = useState(0);
 
-  const totalVideos = 4;
-  const nextVdRef = useRef(null);
+  const bgVdRef = useRef(null);
+  const previewVdRef = useRef(null);
 
   const handleVideoLoad = () => {
     setLoadedVideos((prev) => prev + 1);
@@ -26,28 +31,35 @@ const Hero = () => {
     if (loadedVideos === totalVideos - 1) {
       setLoading(false);
     }
-  }, [loadedVideos]);
+  }, [loadedVideos, totalVideos]);
 
+  // When the preview is clicked, start the transition.
   const handleMiniVdClick = () => {
-    setHasClicked(true);
-    setCurrentIndex((prevIndex) => (prevIndex % totalVideos) + 1);
+    if (!hasClicked) {
+      setHasClicked(true);
+    }
   };
 
   useGSAP(
     () => {
       if (hasClicked) {
-        // Create a timeline that expands video 2 and then fades out video 1.
+        // Create a timeline that expands the preview video,
+        // then fades out the background video.
         const tl = gsap.timeline({
           onComplete: () => {
-            // Optionally pause video 1 after the animation completes.
-            const bgVideo = document.getElementById("bg-video");
-            if (bgVideo) {
-              bgVideo.pause();
-            }
+            // Once the preview has expanded and bg video faded out,
+            // update the background to be the preview video,
+            // and calculate the next preview video.
+            gsap.set("#bg-video", { opacity: 1 });
+            // Optionally, reset the preview video to its initial (hover) state.
+            gsap.set("#preview-video", { scale: 0.5, width: "auto", height: "auto" });
+            setBgIndex(previewIndex);
+            setPreviewIndex((previewIndex % totalVideos) + 1);
+            setHasClicked(false);
           },
         });
-        tl.set("#next-video", { visibility: "visible" })
-          .to("#next-video", {
+        tl.set("#preview-video", { visibility: "visible" })
+          .to("#preview-video", {
             transformOrigin: "center center",
             scale: 1,
             width: "100%",
@@ -55,12 +67,9 @@ const Hero = () => {
             duration: 1,
             ease: "power1.inOut",
             onStart: () => {
-              if (nextVdRef.current) {
-                nextVdRef.current.play();
-              }
+              if (previewVdRef.current) previewVdRef.current.play();
             },
           })
-          // After video 2 has fully expanded, fade out video 1 (the background)
           .to(
             "#bg-video",
             {
@@ -72,10 +81,7 @@ const Hero = () => {
           );
       }
     },
-    {
-      dependencies: [currentIndex, hasClicked],
-      revertOnUpdate: true,
-    }
+    { dependencies: [hasClicked, previewIndex] }
   );
 
   useGSAP(() => {
@@ -102,7 +108,6 @@ const Hero = () => {
     <div className="relative h-dvh w-screen overflow-x-hidden">
       {loading && (
         <div className="flex-center absolute z-[100] h-dvh w-screen overflow-hidden bg-violet-50">
-          {/* https://uiverse.io/G4b413l/tidy-walrus-92 */}
           <div className="three-body">
             <div className="three-body__dot"></div>
             <div className="three-body__dot"></div>
@@ -116,6 +121,7 @@ const Hero = () => {
         className="relative z-10 h-dvh w-screen overflow-hidden rounded-lg bg-blue-75"
       >
         <div>
+          {/* Preview video: shows the next video in the cycle */}
           <div className="mask-clip-path absolute-center absolute z-50 size-64 cursor-pointer overflow-hidden rounded-lg">
             <VideoPreview>
               <div
@@ -123,13 +129,13 @@ const Hero = () => {
                 className="origin-center scale-50 opacity-0 transition-all duration-500 ease-in hover:scale-100 hover:opacity-100"
               >
                 <video
-                  ref={nextVdRef}
-                  src={getVideoSrc((currentIndex % totalVideos) + 1)}
+                  ref={previewVdRef}
+                  src={getVideoSrc(previewIndex)}
                   loop
                   muted
                   autoPlay
                   playsInline
-                  id="current-video"
+                  id="preview-video"
                   className="size-64 origin-center scale-150 object-cover object-center"
                   onLoadedData={handleVideoLoad}
                 />
@@ -137,21 +143,10 @@ const Hero = () => {
             </VideoPreview>
           </div>
 
+          {/* Background video: shows the current video playing */}
           <video
-            ref={nextVdRef}
-            src={getVideoSrc(currentIndex)}
-            loop
-            muted
-            autoPlay
-            playsInline
-            id="next-video"
-            className="absolute-center invisible absolute z-20 size-64 object-cover object-center"
-            onLoadedData={handleVideoLoad}
-          />
-          <video
-            src={getVideoSrc(
-              currentIndex === totalVideos - 1 ? 1 : currentIndex
-            )}
+            ref={bgVdRef}
+            src={getVideoSrc(bgIndex)}
             loop
             muted
             autoPlay
