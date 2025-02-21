@@ -147,6 +147,7 @@ const Hero = () => {
                 onEnded={handleMobileVideoEnded}
                 className="absolute left-0 top-0 size-full object-cover object-center"
                 onLoadedData={handleVideoLoad}
+                style={{ backgroundColor: 'black' }}
               />
               <video
                 ref={queuedVideoRef}
