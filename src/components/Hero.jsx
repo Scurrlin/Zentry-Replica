@@ -10,15 +10,18 @@ import VideoPreview from "./VideoPreview";
 gsap.registerPlugin(ScrollTrigger);
 
 const Hero = () => {
+  const totalVideos = 4;
   const [currentIndex, setCurrentIndex] = useState(1);
+  // For mobile double buffering, we preload the next video index
   const [queuedIndex, setQueuedIndex] = useState(2);
   const [hasClicked, setHasClicked] = useState(false);
   const [loading, setLoading] = useState(true);
   const [loadedVideos, setLoadedVideos] = useState(0);
 
-  const totalVideos = 4;
+  // Refs for the two mobile video elements and for desktop preview
   const currentVideoRef = useRef(null);
   const queuedVideoRef = useRef(null);
+  const nextVdRef = useRef(null);
   const fallbackTimeout = useRef(null);
 
   // Simple mobile detection (adjust breakpoint as needed)
@@ -33,7 +36,10 @@ const Hero = () => {
       setLoading(false);
       console.warn("Fallback triggered: Some videos may not have been loaded.");
     }, 1500);
-    return () => clearTimeout(fallbackTimeout.current);
+
+    return () => {
+      clearTimeout(fallbackTimeout.current);
+    };
   }, []);
 
   useEffect(() => {
@@ -43,15 +49,16 @@ const Hero = () => {
     }
   }, [loadedVideos]);
 
-  // Desktop video preview logic
+  // Desktop: Click handler for video preview expansion
   const handleMiniVdClick = () => {
     setHasClicked(true);
     setCurrentIndex((prevIndex) => (prevIndex % totalVideos) + 1);
   };
 
+  // Desktop GSAP animation on click
   useGSAP(
     () => {
-      if (hasClicked) {
+      if (hasClicked && !isMobile) {
         gsap.set("#next-video", { visibility: "visible" });
         gsap.to("#next-video", {
           transformOrigin: "center center",
@@ -60,7 +67,7 @@ const Hero = () => {
           height: "100%",
           duration: 1,
           ease: "power1.inOut",
-          onStart: () => currentVideoRef.current.play(),
+          onStart: () => nextVdRef.current.play(),
         });
         gsap.from("#current-video", {
           transformOrigin: "center center",
@@ -73,6 +80,7 @@ const Hero = () => {
     { dependencies: [currentIndex], revertOnUpdate: true }
   );
 
+  // Common GSAP for the video frame
   useGSAP(() => {
     gsap.set("#video-frame", {
       clipPath: "polygon(14% 0, 72% 0, 88% 90%, 0 95%)",
@@ -93,21 +101,23 @@ const Hero = () => {
 
   const getVideoSrc = (index) => `videos/hero-${index}.mp4`;
 
-  // Mobile: Handle the transition from current to queued video
-  const handleVideoEnded = () => {
+  // Mobile: When current video ends, fade out and swap in the queued video
+  const handleMobileVideoEnded = () => {
     gsap.to(currentVideoRef.current, {
       opacity: 0,
       duration: 0.5,
       onComplete: () => {
-        // Swap the queued video into the current video slot
+        // Swap: queued video becomes the current video
         setCurrentIndex(queuedIndex);
         const newQueuedIndex = (queuedIndex % totalVideos) + 1;
         setQueuedIndex(newQueuedIndex);
-        // Update the queued video element's source immediately
-        queuedVideoRef.current.src = getVideoSrc(newQueuedIndex);
+        // Immediately update the queued video element's source
+        if (queuedVideoRef.current) {
+          queuedVideoRef.current.src = getVideoSrc(newQueuedIndex);
+        }
         // Reset opacity for the next transition
         gsap.set(currentVideoRef.current, { opacity: 1 });
-      }
+      },
     });
   };
 
@@ -125,31 +135,8 @@ const Hero = () => {
 
       <div id="video-frame" className="relative z-10 h-dvh w-screen overflow-hidden rounded-lg bg-blue-75">
         <div>
-          {/* Desktop: Show the interactive video preview */}
-          {!isMobile && (
-            <div className="mask-clip-path absolute-center absolute z-50 size-64 cursor-pointer overflow-hidden rounded-lg">
-              <VideoPreview>
-                <div
-                  onClick={handleMiniVdClick}
-                  className="origin-center scale-50 opacity-0 transition-all duration-500 ease-in hover:scale-100 hover:opacity-100"
-                >
-                  <video
-                    ref={queuedVideoRef}
-                    src={getVideoSrc((currentIndex % totalVideos) + 1)}
-                    loop
-                    muted
-                    id="current-video"
-                    className="size-64 origin-center scale-150 object-cover object-center"
-                    onLoadedData={handleVideoLoad}
-                    playsInline={true}
-                  />
-                </div>
-              </VideoPreview>
-            </div>
-          )}
-
-          {/* Mobile: Double buffering for smooth video transitions */}
           {isMobile ? (
+            // Mobile: Render two video elements for double buffering
             <>
               <video
                 ref={currentVideoRef}
@@ -157,7 +144,7 @@ const Hero = () => {
                 autoPlay
                 muted
                 playsInline
-                onEnded={handleVideoEnded}
+                onEnded={handleMobileVideoEnded}
                 className="absolute left-0 top-0 size-full object-cover object-center"
                 onLoadedData={handleVideoLoad}
               />
@@ -173,17 +160,48 @@ const Hero = () => {
               />
             </>
           ) : (
-            // Desktop: Single auto-playing, looping video
-            <video
-              ref={currentVideoRef}
-              src={getVideoSrc(currentIndex)}
-              autoPlay
-              muted
-              playsInline
-              loop
-              className="absolute left-0 top-0 size-full object-cover object-center"
-              onLoadedData={handleVideoLoad}
-            />
+            // Desktop: Preserve the original interactive video preview and GSAP animation
+            <>
+              <div className="mask-clip-path absolute-center absolute z-50 size-64 cursor-pointer overflow-hidden rounded-lg max-md:hidden">
+                <VideoPreview>
+                  <div
+                    onClick={handleMiniVdClick}
+                    className="origin-center scale-50 opacity-0 transition-all duration-500 ease-in hover:scale-100 hover:opacity-100"
+                  >
+                    <video
+                      ref={nextVdRef}
+                      src={getVideoSrc((currentIndex % totalVideos) + 1)}
+                      loop
+                      muted
+                      id="current-video"
+                      className="size-64 origin-center scale-150 object-cover object-center"
+                      onLoadedData={handleVideoLoad}
+                      playsInline={true}
+                    />
+                  </div>
+                </VideoPreview>
+              </div>
+
+              <video
+                ref={nextVdRef}
+                src={getVideoSrc(currentIndex)}
+                loop
+                muted
+                id="next-video"
+                className="absolute-center invisible absolute z-20 size-64 object-cover object-center"
+                onLoadedData={handleVideoLoad}
+                playsInline={true}
+              />
+              <video
+                src={getVideoSrc(currentIndex === totalVideos - 1 ? 1 : currentIndex)}
+                autoPlay
+                loop
+                muted
+                className="absolute left-0 top-0 size-full object-cover object-center"
+                onLoadedData={handleVideoLoad}
+                playsInline={true}
+              />
+            </>
           )}
         </div>
 
