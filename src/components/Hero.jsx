@@ -12,16 +12,17 @@ gsap.registerPlugin(ScrollTrigger);
 const Hero = () => {
   const totalVideos = 4;
   const [currentIndex, setCurrentIndex] = useState(1);
-  // For mobile double buffering, we preload the next video index
+  // For mobile double buffering, preload the next video index
   const [queuedIndex, setQueuedIndex] = useState(2);
   const [hasClicked, setHasClicked] = useState(false);
   const [loading, setLoading] = useState(true);
   const [loadedVideos, setLoadedVideos] = useState(0);
 
-  // Refs for the two mobile video elements and for desktop preview
+  // Refs for mobile videos and overlay, and desktop preview
   const currentVideoRef = useRef(null);
   const queuedVideoRef = useRef(null);
   const nextVdRef = useRef(null);
+  const overlayRef = useRef(null);
   const fallbackTimeout = useRef(null);
 
   // Simple mobile detection (adjust breakpoint as needed)
@@ -101,22 +102,21 @@ const Hero = () => {
 
   const getVideoSrc = (index) => `videos/hero-${index}.mp4`;
 
-  // Mobile: When current video ends, fade out and swap in the queued video
+  // Mobile: When current video ends, fade to black via the overlay, then swap videos
   const handleMobileVideoEnded = () => {
-    gsap.to(currentVideoRef.current, {
-      opacity: 0,
+    gsap.to(overlayRef.current, {
+      opacity: 1,
       duration: 0.5,
       onComplete: () => {
         // Swap: queued video becomes the current video
         setCurrentIndex(queuedIndex);
         const newQueuedIndex = (queuedIndex % totalVideos) + 1;
         setQueuedIndex(newQueuedIndex);
-        // Immediately update the queued video element's source
         if (queuedVideoRef.current) {
           queuedVideoRef.current.src = getVideoSrc(newQueuedIndex);
         }
-        // Reset opacity for the next transition
-        gsap.set(currentVideoRef.current, { opacity: 1 });
+        // Fade the overlay back out
+        gsap.to(overlayRef.current, { opacity: 0, duration: 0.5 });
       },
     });
   };
@@ -136,7 +136,7 @@ const Hero = () => {
       <div id="video-frame" className="relative z-10 h-dvh w-screen overflow-hidden rounded-lg bg-blue-75">
         <div>
           {isMobile ? (
-            // Mobile: Render two video elements for double buffering
+            // Mobile: Render two video elements and a black overlay for fade-to-black transition
             <>
               <video
                 ref={currentVideoRef}
@@ -157,6 +157,20 @@ const Hero = () => {
                 className="absolute left-0 top-0 size-full object-cover object-center"
                 style={{ opacity: 0 }}
                 onLoadedData={handleVideoLoad}
+              />
+              {/* Black overlay for fade-to-black effect */}
+              <div
+                ref={overlayRef}
+                style={{
+                  position: "absolute",
+                  top: 0,
+                  left: 0,
+                  width: "100%",
+                  height: "100%",
+                  backgroundColor: "black",
+                  opacity: 0,
+                  pointerEvents: "none",
+                }}
               />
             </>
           ) : (
