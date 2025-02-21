@@ -144,8 +144,7 @@ const Hero = () => {
                 onLoadedData={handleVideoLoad}
                 style={{ backgroundColor: 'black' }}
               />
-              {/*}
-              {/* Black overlay for fade-to-black effect
+              {/* Black overlay for fade-to-black effect */}
               <div
                 ref={overlayRef}
                 style={{
@@ -158,9 +157,7 @@ const Hero = () => {
                   opacity: 0,
                   pointerEvents: "none",
                 }}
-                  
               />
-              */}
             </>
           ) : (
             // Desktop: Preserve the original interactive video preview and GSAP animation
