@@ -12,7 +12,6 @@ gsap.registerPlugin(ScrollTrigger);
 const Hero = () => {
   const [currentIndex, setCurrentIndex] = useState(1);
   const [hasClicked, setHasClicked] = useState(false);
-
   const [loading, setLoading] = useState(true);
   const [loadedVideos, setLoadedVideos] = useState(0);
 
@@ -20,34 +19,30 @@ const Hero = () => {
   const nextVdRef = useRef(null);
   const fallbackTimeout = useRef(null);
 
+  // Simple mobile detection (adjust breakpoint as needed)
+  const isMobile = typeof window !== "undefined" && window.innerWidth < 768;
+
   const handleVideoLoad = () => {
     setLoadedVideos((prev) => prev + 1);
   };
 
   useEffect(() => {
-    // Fallback: Set a timeout to stop loading visuals after 1.5 seconds
     fallbackTimeout.current = setTimeout(() => {
       setLoading(false);
-      console.warn("Falback triggered: Some videos may not have been loaded.");
+      console.warn("Fallback triggered: Some videos may not have been loaded.");
     }, 1500);
-
-    return () => {
-      // Clear the timeout if the component unmounts or all videos load early
-      clearTimeout(fallbackTimeout.current);
-    };
+    return () => clearTimeout(fallbackTimeout.current);
   }, []);
 
   useEffect(() => {
     if (loadedVideos >= totalVideos) {
       setLoading(false);
-      // Clear the fallback timeout if all videos load successfully
-      clearTimeout(fallbackTimeout.current)
+      clearTimeout(fallbackTimeout.current);
     }
   }, [loadedVideos]);
 
   const handleMiniVdClick = () => {
     setHasClicked(true);
-
     setCurrentIndex((prevIndex) => (prevIndex % totalVideos) + 1);
   };
 
@@ -72,10 +67,7 @@ const Hero = () => {
         });
       }
     },
-    {
-      dependencies: [currentIndex],
-      revertOnUpdate: true,
-    }
+    { dependencies: [currentIndex], revertOnUpdate: true }
   );
 
   useGSAP(() => {
@@ -102,7 +94,6 @@ const Hero = () => {
     <div className="relative h-dvh w-screen overflow-x-hidden">
       {loading && (
         <div className="flex-center absolute z-[100] h-dvh w-screen overflow-hidden bg-violet-50">
-          {/* https://uiverse.io/G4b413l/tidy-walrus-92 */}
           <div className="three-body">
             <div className="three-body__dot"></div>
             <div className="three-body__dot"></div>
@@ -111,51 +102,44 @@ const Hero = () => {
         </div>
       )}
 
-      <div
-        id="video-frame"
-        className="relative z-10 h-dvh w-screen overflow-hidden rounded-lg bg-blue-75"
-      >
+      <div id="video-frame" className="relative z-10 h-dvh w-screen overflow-hidden rounded-lg bg-blue-75">
         <div>
-          <div className="mask-clip-path absolute-center absolute z-50 size-64 cursor-pointer overflow-hidden rounded-lg max-md:hidden">
-            <VideoPreview>
-              <div
-                onClick={handleMiniVdClick}
-                className="origin-center scale-50 opacity-0 transition-all duration-500 ease-in hover:scale-100 hover:opacity-100"
-              >
-                <video
-                  ref={nextVdRef}
-                  src={getVideoSrc((currentIndex % totalVideos) + 1)}
-                  loop
-                  muted
-                  id="current-video"
-                  className="size-64 origin-center scale-150 object-cover object-center"
-                  onLoadedData={handleVideoLoad}
-                  playsInline={true}
-                />
-              </div>
-            </VideoPreview>
-          </div>
+          {/* Video preview available only on non-mobile devices */}
+          {!isMobile && (
+            <div className="mask-clip-path absolute-center absolute z-50 size-64 cursor-pointer overflow-hidden rounded-lg">
+              <VideoPreview>
+                <div
+                  onClick={handleMiniVdClick}
+                  className="origin-center scale-50 opacity-0 transition-all duration-500 ease-in hover:scale-100 hover:opacity-100"
+                >
+                  <video
+                    ref={nextVdRef}
+                    src={getVideoSrc((currentIndex % totalVideos) + 1)}
+                    loop
+                    muted
+                    id="current-video"
+                    className="size-64 origin-center scale-150 object-cover object-center"
+                    onLoadedData={handleVideoLoad}
+                    playsInline={true}
+                  />
+                </div>
+              </VideoPreview>
+            </div>
+          )}
 
+          {/* Single auto-playing video element: 
+              On mobile, remove the loop attribute and advance on video end */}
           <video
             ref={nextVdRef}
             src={getVideoSrc(currentIndex)}
-            loop
-            muted
-            id="next-video"
-            className="absolute-center invisible absolute z-20 size-64 object-cover object-center"
-            onLoadedData={handleVideoLoad}
-            playsInline={true}
-          />
-          <video
-            src={getVideoSrc(
-              currentIndex === totalVideos - 1 ? 1 : currentIndex
-            )}
             autoPlay
-            loop
             muted
+            playsInline
+            {...(isMobile
+              ? { onEnded: () => setCurrentIndex((prev) => (prev % totalVideos) + 1) }
+              : { loop: true })}
             className="absolute left-0 top-0 size-full object-cover object-center"
             onLoadedData={handleVideoLoad}
-            playsInline={true}
           />
         </div>
 
