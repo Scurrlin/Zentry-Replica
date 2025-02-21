@@ -9,24 +9,10 @@ import VideoPreview from "./VideoPreview";
 
 gsap.registerPlugin(ScrollTrigger);
 
-// Custom hook to detect mobile based on window width
-function useIsMobile(breakpoint = 768) {
-  const [isMobile, setIsMobile] = useState(
-    typeof window !== "undefined" && window.innerWidth < breakpoint
-  );
-
-  useEffect(() => {
-    const handleResize = () => setIsMobile(window.innerWidth < breakpoint);
-    window.addEventListener("resize", handleResize);
-    return () => window.removeEventListener("resize", handleResize);
-  }, [breakpoint]);
-
-  return isMobile;
-}
-
 const Hero = () => {
   const totalVideos = 4;
   const [currentIndex, setCurrentIndex] = useState(1);
+  
   const [hasClicked, setHasClicked] = useState(false);
   const [loading, setLoading] = useState(true);
   const [loadedVideos, setLoadedVideos] = useState(0);
@@ -36,18 +22,20 @@ const Hero = () => {
   const overlayRef = useRef(null);
   const fallbackTimeout = useRef(null);
 
-  const isMobile = useIsMobile();
+  const isMobile = typeof window !== "undefined" && window.innerWidth < 768;
 
   const handleVideoLoad = () => {
     setLoadedVideos((prev) => prev + 1);
   };
 
   useEffect(() => {
+    // Fallback: Set a timeout to stop loading visuals after 1.5 seconds
     fallbackTimeout.current = setTimeout(() => {
       setLoading(false);
       console.warn("Fallback triggered: Some videos may not have been loaded.");
     }, 1500);
     return () => {
+      // Clear the timeout if the component unmounts or all videos load early
       clearTimeout(fallbackTimeout.current);
     };
   }, []);
@@ -59,11 +47,13 @@ const Hero = () => {
     }
   }, [loadedVideos]);
 
+  // Desktop: Click handler for video preview expansion
   const handleMiniVdClick = () => {
     setHasClicked(true);
     setCurrentIndex((prevIndex) => (prevIndex % totalVideos) + 1);
   };
 
+  // Desktop GSAP animation on click
   useGSAP(
     () => {
       if (hasClicked && !isMobile) {
@@ -108,7 +98,7 @@ const Hero = () => {
 
   const getVideoSrc = (index) => `videos/hero-${index}.mp4`;
 
-  // Mobile: When the current video ends, fade to black, update the video, fade back in
+  // Mobile: When current video ends, fade to black, update video, fade back in
   const handleMobileVideoEnded = () => {
     gsap.to(overlayRef.current, {
       opacity: 1,
@@ -129,6 +119,7 @@ const Hero = () => {
     <div className="relative h-dvh w-screen overflow-x-hidden">
       {loading && (
         <div className="flex-center absolute z-[100] h-dvh w-screen overflow-hidden bg-violet-50">
+          {/* https://uiverse.io/G4b413l/tidy-walrus-92 */}
           <div className="three-body">
             <div className="three-body__dot"></div>
             <div className="three-body__dot"></div>
@@ -140,7 +131,7 @@ const Hero = () => {
       <div id="video-frame" className="relative z-10 h-dvh w-screen overflow-hidden rounded-lg bg-blue-75">
         <div>
           {isMobile ? (
-            // Mobile: Render single video element with fade-to-black overlay
+            // Mobile: Render video element
             <>
               <video
                 ref={currentVideoRef}
@@ -151,8 +142,9 @@ const Hero = () => {
                 onEnded={handleMobileVideoEnded}
                 className="absolute left-0 top-0 size-full object-cover object-center"
                 onLoadedData={handleVideoLoad}
-                style={{ backgroundColor: "black" }}
+                style={{ backgroundColor: 'black' }}
               />
+              {/* Black overlay for fade-to-black effect */}
               <div
                 ref={overlayRef}
                 style={{
@@ -168,7 +160,7 @@ const Hero = () => {
               />
             </>
           ) : (
-            // Desktop: Video preview with click-triggered GSAP animation
+            // Desktop: Video preview
             <>
               <div className="mask-clip-path absolute-center absolute z-50 size-64 cursor-pointer overflow-hidden rounded-lg max-md:hidden">
                 <VideoPreview>
@@ -208,7 +200,7 @@ const Hero = () => {
                 className="absolute left-0 top-0 size-full object-cover object-center"
                 onLoadedData={handleVideoLoad}
                 playsInline={true}
-                style={{ backgroundColor: "black" }}
+                style={{ backgroundColor: 'black' }}
               />
             </>
           )}
