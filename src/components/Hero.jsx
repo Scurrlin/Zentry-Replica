@@ -18,14 +18,30 @@ const Hero = () => {
 
   const totalVideos = 4;
   const nextVdRef = useRef(null);
+  const fallbackTimeout = useRef(null);
 
   const handleVideoLoad = () => {
     setLoadedVideos((prev) => prev + 1);
   };
 
   useEffect(() => {
-    if (loadedVideos === totalVideos - 1) {
+    // Fallback: Set a timeout to stop loading visuals after 1.5 seconds
+    fallbackTimeout.current = setTimeout(() => {
       setLoading(false);
+      console.warn("Falback triggered: Some videos may not have been loaded.");
+    }, 1500);
+
+    return () => {
+      // Clear the timeout if the component unmounts or all videos load early
+      clearTimeout(fallbackTimeout.current);
+    };
+  }, []);
+
+  useEffect(() => {
+    if (loadedVideos >= totalVideos) {
+      setLoading(false);
+      // Clear the fallback timeout if all videos load successfully
+      clearTimeout(fallbackTimeout.current)
     }
   }, [loadedVideos]);
 
@@ -111,11 +127,10 @@ const Hero = () => {
                   src={getVideoSrc((currentIndex % totalVideos) + 1)}
                   loop
                   muted
-                  autoPlay
-                  playsInline
                   id="current-video"
                   className="size-64 origin-center scale-150 object-cover object-center"
                   onLoadedData={handleVideoLoad}
+                  playsInline={true}
                 />
               </div>
             </VideoPreview>
@@ -126,22 +141,21 @@ const Hero = () => {
             src={getVideoSrc(currentIndex)}
             loop
             muted
-            autoPlay
-            playsInline
             id="next-video"
             className="absolute-center invisible absolute z-20 size-64 object-cover object-center"
             onLoadedData={handleVideoLoad}
+            playsInline={true}
           />
           <video
             src={getVideoSrc(
               currentIndex === totalVideos - 1 ? 1 : currentIndex
             )}
+            autoPlay
             loop
             muted
-            autoPlay
-            playsInline
             className="absolute left-0 top-0 size-full object-cover object-center"
             onLoadedData={handleVideoLoad}
+            playsInline={true}
           />
         </div>
 
