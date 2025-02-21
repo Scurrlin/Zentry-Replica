@@ -12,18 +12,16 @@ gsap.registerPlugin(ScrollTrigger);
 const Hero = () => {
   const totalVideos = 4;
   const [currentIndex, setCurrentIndex] = useState(1);
-  // Removed queuedIndex state because we no longer need a second video element on mobile.
+  
   const [hasClicked, setHasClicked] = useState(false);
   const [loading, setLoading] = useState(true);
   const [loadedVideos, setLoadedVideos] = useState(0);
 
-  // Refs for mobile video and overlay, and desktop preview
   const currentVideoRef = useRef(null);
   const nextVdRef = useRef(null);
   const overlayRef = useRef(null);
   const fallbackTimeout = useRef(null);
 
-  // Simple mobile detection (adjust breakpoint as needed)
   const isMobile = typeof window !== "undefined" && window.innerWidth < 768;
 
   const handleVideoLoad = () => {
@@ -31,11 +29,13 @@ const Hero = () => {
   };
 
   useEffect(() => {
+    // Fallback: Set a timeout to stop loading visuals after 1.5 seconds
     fallbackTimeout.current = setTimeout(() => {
       setLoading(false);
       console.warn("Fallback triggered: Some videos may not have been loaded.");
     }, 1500);
     return () => {
+      // Clear the timeout if the component unmounts or all videos load early
       clearTimeout(fallbackTimeout.current);
     };
   }, []);
@@ -78,7 +78,6 @@ const Hero = () => {
     { dependencies: [currentIndex], revertOnUpdate: true }
   );
 
-  // Common GSAP for the video frame
   useGSAP(() => {
     gsap.set("#video-frame", {
       clipPath: "polygon(14% 0, 72% 0, 88% 90%, 0 95%)",
@@ -99,7 +98,7 @@ const Hero = () => {
 
   const getVideoSrc = (index) => `videos/hero-${index}.mp4`;
 
-  // Mobile: When the current video ends, fade to black, update the video, then fade back in.
+  // Mobile: When the current video ends, fade to black, update the video, fade back in
   const handleMobileVideoEnded = () => {
     gsap.to(overlayRef.current, {
       opacity: 1,
@@ -120,6 +119,7 @@ const Hero = () => {
     <div className="relative h-dvh w-screen overflow-x-hidden">
       {loading && (
         <div className="flex-center absolute z-[100] h-dvh w-screen overflow-hidden bg-violet-50">
+          {/* https://uiverse.io/G4b413l/tidy-walrus-92 */}
           <div className="three-body">
             <div className="three-body__dot"></div>
             <div className="three-body__dot"></div>
@@ -131,7 +131,7 @@ const Hero = () => {
       <div id="video-frame" className="relative z-10 h-dvh w-screen overflow-hidden rounded-lg bg-blue-75">
         <div>
           {isMobile ? (
-            // Mobile: Render a single video element with a black overlay for fade-to-black effect
+            // Mobile: Render video element
             <>
               <video
                 ref={currentVideoRef}
@@ -160,7 +160,7 @@ const Hero = () => {
               />
             </>
           ) : (
-            // Desktop: Preserve the original interactive video preview and GSAP animation
+            // Desktop: Video preview
             <>
               <div className="mask-clip-path absolute-center absolute z-50 size-64 cursor-pointer overflow-hidden rounded-lg max-md:hidden">
                 <VideoPreview>
