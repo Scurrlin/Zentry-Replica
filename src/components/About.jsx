@@ -13,15 +13,15 @@ const About = () => {
         trigger: "#clip",
         start: "center center",
         end: "+=800 center",
-        scrub: 1.0,
+        scrub: 0.5,
         pin: true,
         pinSpacing: true,
       },
     });
 
     clipAnimation.to(".mask-clip-path", {
-      width: "100dvw",
-      height: "100dvh",
+      width: "100vw",
+      height: "100vh",
       borderRadius: 0,
     });
   });
@@ -39,11 +39,8 @@ const About = () => {
         />
 
         <div className="about-subtext">
-          <p>The Game of Games begins—your life, now an epic MMORPG</p>
-          <p className="text-gray-500">
-            Zentry unites every player from countless games and platforms, both
-            digital and physical, into a unified Play Economy
-          </p>
+          <p>The Game of Games begins-your life, now an epic MMORPG</p>
+          <p>Zentry unites every player from countless games and platforms, both digital and physical, into a unified Play Economy</p>
         </div>
       </div>
 
