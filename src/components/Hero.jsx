@@ -98,8 +98,7 @@ const Hero = () => {
 
   const getVideoSrc = (index) => `videos/hero-${index}.mp4`;
 
-  // Mobile: When current video ends, fade to black, update the video,
-  // fade the video in, and then fade the overlay out.
+  // Mobile: When current video ends, fade to black, update video, fade back in
   const handleMobileVideoEnded = () => {
     gsap.to(overlayRef.current, {
       opacity: 1,
@@ -108,14 +107,9 @@ const Hero = () => {
         const nextIndex = (currentIndex % totalVideos) + 1;
         setCurrentIndex(nextIndex);
         if (currentVideoRef.current) {
-          // Update the source and set opacity to 0 for fade-in effect
           currentVideoRef.current.src = getVideoSrc(nextIndex);
-          gsap.set(currentVideoRef.current, { opacity: 0 });
           currentVideoRef.current.play();
-          // Animate the video's opacity from 0 to 1 (fade-in)
-          gsap.to(currentVideoRef.current, { opacity: 1, duration: 0.5 });
         }
-        // Fade out the overlay concurrently
         gsap.to(overlayRef.current, { opacity: 0, duration: 0.5 });
       },
     });
@@ -137,7 +131,7 @@ const Hero = () => {
       <div id="video-frame" className="relative z-10 h-dvh w-screen overflow-hidden rounded-lg bg-blue-75">
         <div>
           {isMobile ? (
-            // Mobile: Render single video element with fade-to-black overlay and fade-in effect
+            // Mobile: Render video element
             <>
               <video
                 ref={currentVideoRef}
@@ -148,8 +142,9 @@ const Hero = () => {
                 onEnded={handleMobileVideoEnded}
                 className="absolute left-0 top-0 size-full object-cover object-center"
                 onLoadedData={handleVideoLoad}
-                style={{ backgroundColor: "black" }}
+                style={{ backgroundColor: 'black' }}
               />
+              {/* Black overlay for fade-to-black effect */}
               <div
                 ref={overlayRef}
                 style={{
@@ -165,7 +160,7 @@ const Hero = () => {
               />
             </>
           ) : (
-            // Desktop: Video preview with click-triggered GSAP animation
+            // Desktop: Video preview
             <>
               <div className="mask-clip-path absolute-center absolute z-50 size-64 cursor-pointer overflow-hidden rounded-lg max-md:hidden">
                 <VideoPreview>
@@ -205,7 +200,7 @@ const Hero = () => {
                 className="absolute left-0 top-0 size-full object-cover object-center"
                 onLoadedData={handleVideoLoad}
                 playsInline={true}
-                style={{ backgroundColor: "black" }}
+                style={{ backgroundColor: 'black' }}
               />
             </>
           )}
