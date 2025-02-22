@@ -13,15 +13,15 @@ const About = () => {
         trigger: "#clip",
         start: "center center",
         end: "+=800 center",
-        scrub: 0.5,
+        scrub: 1.0,
         pin: true,
         pinSpacing: true,
       },
     });
 
     clipAnimation.to(".mask-clip-path", {
-      width: "100vw",
-      height: "100vh",
+      width: "100dvw",
+      height: "100dvh",
       borderRadius: 0,
     });
   });
