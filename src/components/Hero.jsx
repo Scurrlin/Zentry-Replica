@@ -12,20 +12,16 @@ gsap.registerPlugin(ScrollTrigger);
 const Hero = () => {
   const totalVideos = 4;
   const [currentIndex, setCurrentIndex] = useState(1);
-  // For mobile double buffering, preload the next video index
-  const [queuedIndex, setQueuedIndex] = useState(2);
+  
   const [hasClicked, setHasClicked] = useState(false);
   const [loading, setLoading] = useState(true);
   const [loadedVideos, setLoadedVideos] = useState(0);
 
-  // Refs for mobile videos and overlay, and desktop preview
   const currentVideoRef = useRef(null);
-  const queuedVideoRef = useRef(null);
   const nextVdRef = useRef(null);
   const overlayRef = useRef(null);
   const fallbackTimeout = useRef(null);
 
-  // Simple mobile detection (adjust breakpoint as needed)
   const isMobile = typeof window !== "undefined" && window.innerWidth < 768;
 
   const handleVideoLoad = () => {
@@ -33,12 +29,13 @@ const Hero = () => {
   };
 
   useEffect(() => {
+    // Fallback: Set a timeout to stop loading visuals after 1.5 seconds
     fallbackTimeout.current = setTimeout(() => {
       setLoading(false);
       console.warn("Fallback triggered: Some videos may not have been loaded.");
     }, 1500);
-
     return () => {
+      // Clear the timeout if the component unmounts or all videos load early
       clearTimeout(fallbackTimeout.current);
     };
   }, []);
@@ -81,7 +78,6 @@ const Hero = () => {
     { dependencies: [currentIndex], revertOnUpdate: true }
   );
 
-  // Common GSAP for the video frame
   useGSAP(() => {
     gsap.set("#video-frame", {
       clipPath: "polygon(14% 0, 72% 0, 88% 90%, 0 95%)",
@@ -102,20 +98,18 @@ const Hero = () => {
 
   const getVideoSrc = (index) => `videos/hero-${index}.mp4`;
 
-  // Mobile: When current video ends, fade to black via the overlay, then swap videos
+  // Mobile: When current video ends, fade to black, update video, fade back in
   const handleMobileVideoEnded = () => {
     gsap.to(overlayRef.current, {
       opacity: 1,
       duration: 0.5,
       onComplete: () => {
-        // Swap: queued video becomes the current video
-        setCurrentIndex(queuedIndex);
-        const newQueuedIndex = (queuedIndex % totalVideos) + 1;
-        setQueuedIndex(newQueuedIndex);
-        if (queuedVideoRef.current) {
-          queuedVideoRef.current.src = getVideoSrc(newQueuedIndex);
+        const nextIndex = (currentIndex % totalVideos) + 1;
+        setCurrentIndex(nextIndex);
+        if (currentVideoRef.current) {
+          currentVideoRef.current.src = getVideoSrc(nextIndex);
+          currentVideoRef.current.play();
         }
-        // Fade the overlay back out
         gsap.to(overlayRef.current, { opacity: 0, duration: 0.5 });
       },
     });
@@ -125,6 +119,7 @@ const Hero = () => {
     <div className="relative h-dvh w-screen overflow-x-hidden">
       {loading && (
         <div className="flex-center absolute z-[100] h-dvh w-screen overflow-hidden bg-violet-50">
+          {/* https://uiverse.io/G4b413l/tidy-walrus-92 */}
           <div className="three-body">
             <div className="three-body__dot"></div>
             <div className="three-body__dot"></div>
@@ -136,7 +131,7 @@ const Hero = () => {
       <div id="video-frame" className="relative z-10 h-dvh w-screen overflow-hidden rounded-lg bg-blue-75">
         <div>
           {isMobile ? (
-            // Mobile: Render two video elements and a black overlay for fade-to-black transition
+            // Mobile: Render video element
             <>
               <video
                 ref={currentVideoRef}
@@ -147,17 +142,7 @@ const Hero = () => {
                 onEnded={handleMobileVideoEnded}
                 className="absolute left-0 top-0 size-full object-cover object-center"
                 onLoadedData={handleVideoLoad}
-                style={{ backgroundColor: "black" }}
-              />
-              <video
-                ref={queuedVideoRef}
-                src={getVideoSrc(queuedIndex)}
-                autoPlay
-                muted
-                playsInline
-                className="absolute left-0 top-0 size-full object-cover object-center"
-                style={{ opacity: 0 }}
-                onLoadedData={handleVideoLoad}
+                style={{ backgroundColor: 'black' }}
               />
               {/* Black overlay for fade-to-black effect */}
               <div
@@ -175,7 +160,7 @@ const Hero = () => {
               />
             </>
           ) : (
-            // Desktop: Preserve the original interactive video preview and GSAP animation
+            // Desktop: Video preview
             <>
               <div className="mask-clip-path absolute-center absolute z-50 size-64 cursor-pointer overflow-hidden rounded-lg max-md:hidden">
                 <VideoPreview>
@@ -215,7 +200,7 @@ const Hero = () => {
                 className="absolute left-0 top-0 size-full object-cover object-center"
                 onLoadedData={handleVideoLoad}
                 playsInline={true}
-                style={{ backgroundColor: 'black'}}
+                style={{ backgroundColor: 'black' }}
               />
             </>
           )}
